@@ -1,0 +1,17 @@
+COMIC_TITLE: Batman
+FIRST: True
+JSLIB_VER: 2.5.3
+
+# FIXME: Add deep merge of objects. Right now, we have to duplicate the
+# Fantastic Four here.
+COMICS:
+  'Fantastic Four':
+    characters:
+    - 'Mister Fantastic'
+    - 'Invisible Woman'
+    - 'Thing'
+    - 'Human Torch'
+  Batman:
+    characters:
+    - Batman
+    - Robin
