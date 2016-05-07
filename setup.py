@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='settings-resolver',
-    version='1.0.0',
+    version='1.0.1',
     description='Allows interdependent Django settings overrides, through late binding',
     long_description=(
         'Use lambda functions to specify your Django settings. '
