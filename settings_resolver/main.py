@@ -1,7 +1,5 @@
 import re
 from settings_overrider import override
-import ChainTreeMap
-
 
 # Deferred is used to wrap a setting variable lambda function, that will be 
 # resolved late, after all the imports
@@ -26,7 +24,6 @@ class Resolver(object):
 # used inside the lambda functions, to dereference any other setting value.
 # Users can import this as `s` for convenience.
 resolver = Resolver()
-
 
 def resolve(settings, yaml=None, env=None):
     """

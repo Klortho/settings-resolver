@@ -1,6 +1,7 @@
 /.cache/
 .coverage
 /coverage.xml
+/dist/
 /env/
 /htmlcov/
 __pycache__/

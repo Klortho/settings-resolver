@@ -1,13 +1,6 @@
 #!/usr/bin/env python
 
-import itertools
-from itertools import chain
-import operator
-import sys
-import pprint
 from collections import abc
-
-pp = pprint.PrettyPrinter(indent=4)
 
 # This class builds upon the Chainmap class described here:
 # http://code.activestate.com/recipes/305268/.
