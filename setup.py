@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='settings-resolver',
-    version='1.0.2',
+    version='1.0.3',
     description='Allows interdependent Django settings overrides, through late binding',
     long_description=(
         'Use lambda functions to specify your Django settings. '
@@ -13,7 +13,7 @@ setup(
     author='Chris Maloney',
     author_email='voldrani@gmail.com',
     license='WTFPL',
-    py_modules=['settings_resolver'],
+    packages=['settings_resolver'],
     install_requires=[
         'PyYAML', 
         'settings-overrider'
@@ -30,5 +30,5 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3'
-    ]
+    ],
 )
