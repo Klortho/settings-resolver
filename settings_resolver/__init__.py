@@ -1,2 +1,2 @@
 from .main import *
-from .chain_map_tree import ChainMapTree
+from .merged_tree import MergedTree

@@ -2,15 +2,17 @@
 
 from collections import abc
 
-# This class builds upon the Chainmap class described here:
+# This is similar to Python's collections.ChainMap class, but works with
+# hierarchical (nested) dicts, not just flat ones.
+# It was inspired by the Chainmap class described here:
 # http://code.activestate.com/recipes/305268/.
-# It provides an elegant way to merge multiple hierarchical dictionaries or
+# This provides an elegant way to merge multiple hierarchical dictionaries or
 # other mapping-type objects in Python.
 
 is_mapping = lambda x: isinstance(x, abc.Mapping)
 not_mapping = lambda x: not(is_mapping(x))
 
-class ChainMapTree(abc.Mapping):
+class MergedTree(abc.Mapping):
     """Combine/overlay multiple hierarchical mappings. This efficiently merges
     multiple hierarchical (could be several layers deep) dictionaries, producing
     a new view into them that acts exactly like a merged dictionary, but without
@@ -20,6 +22,9 @@ class ChainMapTree(abc.Mapping):
     with immutable mappings. It is safe to change *leaf* data values,
     and the results will be reflected here, but changing the structure of any
     of the trees will not work.
+
+    Or, you can convert it to a normal dict tree immediately after you create
+    it, with the .dict() method.
     """
     def __init__(self, *maps):
         _maps = list(maps)
@@ -36,7 +41,7 @@ class ChainMapTree(abc.Mapping):
             # Make sure they are *all* mappings
             if any(map(not_mapping, kmaps)): raise KeyError(key)
             # Recurse
-            kid_maps[key] = ChainMapTree(*kmaps)
+            kid_maps[key] = MergedTree(*kmaps)
 
         # If non-empty, prepend it to the existing list
         if len(kid_maps.keys()) > 0: _maps.insert(0, kid_maps)
@@ -52,16 +57,27 @@ class ChainMapTree(abc.Mapping):
         raise KeyError(key)
 
     def __iter__(self):
-        return self._maps.__iter__()
+        return set([key for m in self._maps for key in m.keys()]).__iter__()
 
     def __len__(self):
-        return self._maps.__len__()
+        return len(self)
+
+    def dict(self):
+        """
+        Use this explict conversion method to do a deep conversion to a 
+        run-of-the-mill, mutable dictionary tree
+        """
+        # This "regularizes" a child value, meaning that if it's a MergedTree, 
+        # it's converted to a dict.
+        regv = lambda v: v.dict() if isinstance(v, MergedTree) else v
+        # Create dict with an iterator that returns "regularized" tuples 
+        return dict(map(lambda k: (k, regv(self[k])), self))
 
 
 if __name__ == "__main__":
     d1 = {'a':1, 'b':2, 'c': {'c1': 1, 'c2': 2}}
     d2 = {'a':3, 'd':4, 'c': {'c2': 4, 'c3': 3}}
-    cm = ChainMapTree(d1, d2)
+    cm = MergedTree(d1, d2)
     assert cm['a'] == 1
     assert cm['b'] == 2
     assert cm['d'] == 4
@@ -112,7 +128,7 @@ if __name__ == "__main__":
             }
         },
     ]
-    cmt = ChainMapTree(*testDicts)
+    cmt = MergedTree(*testDicts)
     assert cmt['a'] == 1001
     assert cmt['b']['ba']['baa'] == 1211
     assert cmt['b']['ba']['bab'] == 3212

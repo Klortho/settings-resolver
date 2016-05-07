@@ -16,11 +16,11 @@ def dump_settings(header, s):
     pp.pprint(settings)
 
 def test_merge():
-    from settings_resolver import ChainMapTree
+    from settings_resolver import MergedTree
 
     d1 = {'a':1, 'b':2, 'c': {'c1': 1, 'c2': 2}}
     d2 = {'a':3, 'd':4, 'c': {'c2': 4, 'c3': 3}}
-    cm = ChainMapTree(d1, d2)
+    cm = MergedTree(d1, d2)
     assert cm['a'] == 1
     assert cm['b'] == 2
     assert cm['d'] == 4
@@ -71,7 +71,7 @@ def test_merge():
             }
         },
     ]
-    cmt = ChainMapTree(*testDicts)
+    cmt = MergedTree(*testDicts)
     assert cmt['a'] == 1001
     assert cmt['b']['ba']['baa'] == 1211
     assert cmt['b']['ba']['bab'] == 3212
