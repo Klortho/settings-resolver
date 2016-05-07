@@ -1,9 +1,21 @@
+#!/usr/bin/env python
+
+import itertools
+from itertools import chain
+import operator
+import sys
+import pprint
 from collections import abc
+
+pp = pprint.PrettyPrinter(indent=4)
 
 # This class builds upon the Chainmap class described here:
 # http://code.activestate.com/recipes/305268/.
 # It provides an elegant way to merge multiple hierarchical dictionaries or
 # other mapping-type objects in Python.
+
+is_mapping = lambda x: isinstance(x, abc.Mapping)
+not_mapping = lambda x: not(is_mapping(x))
 
 class ChainMapTree(abc.Mapping):
     """Combine/overlay multiple hierarchical mappings. This efficiently merges
@@ -16,32 +28,26 @@ class ChainMapTree(abc.Mapping):
     and the results will be reflected here, but changing the structure of any
     of the trees will not work.
     """
-
     def __init__(self, *maps):
         _maps = list(maps)
 
-        is_mapping = lambda x: isinstance(x, abc.Mapping)
+        # All keys of kids that are mappings
+        kid_keys = set([key for m in maps 
+            for key in m.keys() if is_mapping(m[key])])
 
-        # Union of all keys of all of the maps whose values are mappings
-        map_keys = set([key for m in maps 
-            for key in m.keys() if is_mapping(m[key])
-        ])
-
-        # The child ChainMapTree for a given key
-        def kid_chain(key):
+        # This will be a dictionary of lists of mappings
+        kid_maps = {};
+        for key in kid_keys:
             # The list of child mappings for this key
-            kid_maps = [ m[key] for m in maps if key in m ]
-            # Make sure they are all mappings
-            not_mapping = lambda x: not(is_mapping(x))
-            if any(map(not_mapping, kid_maps)): raise KeyError
-            return ChainMapTree(*kid_maps)
-
-        # A dictionary of ChainMapTrees for these keys
-        kid_map_chains = dict((k, kid_chain(k)) for k in map_keys)
+            kmaps = [ m[key] for m in maps if key in m ]
+            # Make sure they are *all* mappings
+            if any(map(not_mapping, kmaps)): raise KeyError(key)
+            # Recurse
+            kid_maps[key] = ChainMapTree(*kmaps)
 
         # If non-empty, prepend it to the existing list
-        if len(kid_map_chains.keys()) > 0:
-            _maps.insert(0, kid_map_chains)
+        if len(kid_maps.keys()) > 0: _maps.insert(0, kid_maps)
+
         self._maps = _maps
 
     def __getitem__(self, key):
@@ -113,9 +119,8 @@ if __name__ == "__main__":
             }
         },
     ]
-
     cmt = ChainMapTree(*testDicts)
-    assert cmt.a == 1001
+    assert cmt['a'] == 1001
     assert cmt['b']['ba']['baa'] == 1211
     assert cmt['b']['ba']['bab'] == 3212
     assert cmt['b']['bb'] == 1022
