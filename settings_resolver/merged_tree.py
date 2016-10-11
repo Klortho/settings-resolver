@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from collections import abc
+from collections import Mapping
+
 
 # This is similar to Python's collections.ChainMap class, but works with
 # hierarchical (nested) dicts, not just flat ones.
@@ -9,16 +10,16 @@ from collections import abc
 # This provides an elegant way to merge multiple hierarchical dictionaries or
 # other mapping-type objects in Python.
 
-is_mapping = lambda x: isinstance(x, abc.Mapping)
+is_mapping = lambda x: isinstance(x, Mapping)
 not_mapping = lambda x: not(is_mapping(x))
 
-class MergedTree(abc.Mapping):
+class MergedTree(Mapping):
     """Combine/overlay multiple hierarchical mappings. This efficiently merges
     multiple hierarchical (could be several layers deep) dictionaries, producing
     a new view into them that acts exactly like a merged dictionary, but without
     doing any copying.
 
-    Because it doesn't actually copy the data, it is intended to be used only 
+    Because it doesn't actually copy the data, it is intended to be used only
     with immutable mappings. It is safe to change *leaf* data values,
     and the results will be reflected here, but changing the structure of any
     of the trees will not work.
@@ -30,7 +31,7 @@ class MergedTree(abc.Mapping):
         _maps = list(maps)
 
         # All keys of kids that are mappings
-        kid_keys = set([key for m in maps 
+        kid_keys = set([key for m in maps
             for key in m.keys() if is_mapping(m[key])])
 
         # This will be a dictionary of lists of mappings
@@ -64,13 +65,13 @@ class MergedTree(abc.Mapping):
 
     def dict(self):
         """
-        Use this explict conversion method to do a deep conversion to a 
+        Use this explict conversion method to do a deep conversion to a
         run-of-the-mill, mutable dictionary tree
         """
-        # This "regularizes" a child value, meaning that if it's a MergedTree, 
+        # This "regularizes" a child value, meaning that if it's a MergedTree,
         # it's converted to a dict.
         regv = lambda v: v.dict() if isinstance(v, MergedTree) else v
-        # Create dict with an iterator that returns "regularized" tuples 
+        # Create dict with an iterator that returns "regularized" tuples
         return dict(map(lambda k: (k, regv(self[k])), self))
 
 
